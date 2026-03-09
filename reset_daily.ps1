@@ -3,9 +3,10 @@
 Resets @daily tasks in a Todo+ file and logs completed/cancelled tasks.
 
 .DESCRIPTION
-This script reads the specified .todo file, looks for sections marked with @daily,
-logs any modified tasks (done, cancelled, or started) to a log file, and then
-resets those tasks to an empty state (☐) while removing time tracking tags.
+This script reads the specified .todo file, looks for sections marked with @daily
+(and their nested subsections), logs any modified tasks (done, cancelled, or started)
+to a log file, and then resets those tasks to an empty state (☐) while removing
+time tracking tags.
 #>
 
 param (
@@ -24,18 +25,41 @@ $newLines = @()
 $logLines = New-Object System.Collections.Generic.List[string]
 
 $inDailySection = $false
+$dailyIndentation = -1
 $dateStr = (Get-Date).ToString("yyyy-MM-dd")
 $hasChangesToLog = $false
-$currentSectionHeader = $null
+$headerStack = New-Object System.Collections.Generic.List[psobject]
 
 foreach ($line in $lines) {
-    # Check if line is a section header (ends with colon)
-    if ($line -match ":\s*$") {
+    $trimmed = $line.TrimStart()
+    $indentLength = $line.Length - $trimmed.Length
+
+    # Check if line is a section header (ends with colon and doesn't start with a task checkbox)
+    if ($line -match ":\s*$" -and $line -notmatch "^\s*($check|$cross|$box)") {
         if ($line -match "@daily") {
             $inDailySection = $true
-            $currentSectionHeader = $line
+            $dailyIndentation = $indentLength
+            
+            # Remove any existing headers at this level or deeper
+            for ($i = $headerStack.Count - 1; $i -ge 0; $i--) {
+                if ($headerStack[$i].Indent -ge $indentLength) {
+                    $headerStack.RemoveAt($i)
+                }
+            }
+            $headerStack.Add([PSCustomObject]@{ Indent = $indentLength; Text = $line; Printed = $false })
+        } elseif ($inDailySection -and $indentLength -gt $dailyIndentation) {
+            # It's a subsection of the active @daily section
+            for ($i = $headerStack.Count - 1; $i -ge 0; $i--) {
+                if ($headerStack[$i].Indent -ge $indentLength) {
+                    $headerStack.RemoveAt($i)
+                }
+            }
+            $headerStack.Add([PSCustomObject]@{ Indent = $indentLength; Text = $line; Printed = $false })
         } else {
+            # We are outside the daily section now
             $inDailySection = $false
+            $dailyIndentation = -1
+            $headerStack.Clear()
         }
         $newLines += $line
         continue
@@ -52,10 +76,15 @@ foreach ($line in $lines) {
                     $logLines.Add("=== Log for $dateStr ===")
                     $hasChangesToLog = $true
                 }
-                if ($null -ne $currentSectionHeader) {
-                    $logLines.Add($currentSectionHeader)
-                    $currentSectionHeader = $null
+                
+                # Print any unprinted headers in the stack
+                foreach ($h in $headerStack) {
+                    if (-not $h.Printed) {
+                        $logLines.Add($h.Text)
+                        $h.Printed = $true
+                    }
                 }
+                
                 $logLines.Add($line)
             }
 
