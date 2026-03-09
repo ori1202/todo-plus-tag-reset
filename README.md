@@ -25,6 +25,17 @@ This PowerShell script reads a `.todo` file, finds sections marked with `@daily`
 .\reset_daily.ps1 -TodoFilePath "C:\path\to\my.todo" -LogFilePath "C:\path\to\daily_log.txt"
 ```
 
+## Examples
+
+See the [examples/](examples/) folder for sample files:
+
+- **sample.todo** — Routine-plan style with nested `@daily` sections and time-block tasks (e.g. `☐ 8:00 - 8:30 → Task`)
+- **sample_log.txt** — Example log output after running the script
+
+```powershell
+.\reset_daily.ps1 -TodoFilePath ".\examples\sample.todo" -LogFilePath ".\examples\my_log.txt"
+```
+
 ## Requirements
 
 - PowerShell 5.1 or later

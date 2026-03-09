@@ -1,0 +1,19 @@
+routine Plan:
+
+    @daily Morning (Slow Start & Prep):
+        
+        ☐ 8:00 - 8:30 → Yoga/stretch (gentle wake-up)
+        ✔ 8:30 - 9:30 → Music while prepping backpack @done(2025-03-09T09:30)
+        ☐ 9:30 - 10:00 → Small personal task (e.g., tidy workspace, quick emails)
+
+    @daily Late Morning (Moderate Focus Window):
+        
+        ☐ 10:00 - 10:45 → Work on scraper (pick a micro-task)
+        ✘ 10:45 - 11:30 → GUI component @cancelled(2025-03-09T11:00)
+        ☐ 11:30 - 12:00 → Short scroll/music break @started(2025-03-09T11:15)
+
+    @daily Afternoon (Recharge & Low Effort):
+        
+        ☐ 12:00 - 13:00 → Lunch + music
+        ☐ 13:00 - 14:30 → Scroll/social or casual browsing
+        ☐ 14:30 - 15:00 → PCB micro-task (test one small thing or prep materials)
